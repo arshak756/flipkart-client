@@ -1,4 +1,6 @@
 import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const HeroCarousel = () => {
   const banners = [
@@ -15,7 +17,7 @@ const HeroCarousel = () => {
       image: "https://rukminim1.flixcart.com/fk-p-flap/3240/540/image/de65a463259b7ebb.jpg?q=60",
     },
     {
-      id: 3,
+      id: 4,
       image: "https://rukminim1.flixcart.com/fk-p-flap/3240/540/image/5b309e98775e22e4.jpg?q=60",
     },
   ];
@@ -29,20 +31,24 @@ const HeroCarousel = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: false,
+    pauseOnHover: false,
   };
 
   return (
-    <div className="rounded overflow-hidden">
-      <Slider {...settings}>
-        {banners.map((banner) => (
-          <img
-            key={banner.id}
-            src={banner.image}
-            alt={`Banner ${banner.id}`}
-            className="w-full h-52 md:h-72 object-cover"
-          />
-        ))}
-      </Slider>
+    <div className="w-full px-3 md:px- lg:px-10 mt-2">
+      <div className="rounded-lg overflow-hidden shadow-sm border">
+        <Slider {...settings}>
+          {banners.map((banner) => (
+            <div key={banner.id}>
+              <img
+                src={banner.image}
+                alt={`Banner ${banner.id}`}
+                className="w-full max-h-[440px] mx-auto object-contain bg-white"
+              />
+            </div>
+          ))}
+        </Slider>
+      </div>
     </div>
   );
 };

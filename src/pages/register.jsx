@@ -4,7 +4,7 @@ import axios from "../utils/axiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
-const Register = () => {
+const Register = ({ setUser }) => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -22,26 +22,44 @@ const Register = () => {
     setLoading(true);
 
     try {
-      
-      const res = await axios.post("/api/users/register", form);
+      await axios.post("/api/users/register", form);
 
-      if (res.data) {
-        
-        const loginRes = await axios.post("/api/users/login", {
-          email: form.email,
-          password: form.password,
-        });
+      const loginRes = await axios.post("/api/users/login", {
+        email: form.email,
+        password: form.password,
+      });
 
-        // Save user info to localStorage
-        localStorage.setItem("userInfo", JSON.stringify(loginRes.data));
+      const { token, user } = loginRes.data;
 
-        // Redirect to homepage or dashboard
-        navigate("/");
-      }
+      localStorage.setItem("token", token);
+      localStorage.setItem("userInfo", JSON.stringify(user));
+      setUser(user);
+
+      navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const res = await axios.post("/api/users/google", {
+        name: decoded.name,
+        email: decoded.email,
+        picture: decoded.picture,
+      });
+
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("userInfo", JSON.stringify(user));
+      setUser(user);
+
+      navigate("/");
+    } catch (err) {
+      console.error("Google signup failed", err);
     }
   };
 
@@ -67,7 +85,6 @@ const Register = () => {
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
@@ -114,30 +131,11 @@ const Register = () => {
             </button>
           </form>
 
-          {/* Google Login */}
           <div className="mt-6 text-center">
             <p className="text-gray-500 mb-2 text-sm">Or sign up using Google</p>
             <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                try {
-                  const decoded = jwtDecode(credentialResponse.credential);
-                  const res = await axios.post("/api/users/google", {
-                    name: decoded.name,
-                    email: decoded.email,
-                    picture: decoded.picture,
-                  });
-
-                  if (res.data.token) {
-                    localStorage.setItem("userInfo", JSON.stringify(res.data));
-                    navigate("/");
-                  }
-                } catch (err) {
-                  console.error("Google signup failed", err);
-                }
-              }}
-              onError={() => {
-                console.error("Google login was unsuccessful");
-              }}
+              onSuccess={handleGoogleSignup}
+              onError={() => console.error("Google login failed")}
             />
           </div>
 

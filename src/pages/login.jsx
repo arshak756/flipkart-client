@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/axiosInstance";
-
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
-const Login = () => {
+const Login = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,15 +16,12 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await axios.post("/api/users/login", {
-        email,
-        password,
-      });
-
+      const res = await axios.post("/api/users/login", { email, password });
       const { token, user } = res.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("userInfo", JSON.stringify(user));
+      setUser(user);
 
       if (user.isAdmin) {
         navigate("/admin/dashboard");
@@ -42,16 +38,12 @@ const Login = () => {
       const decoded = jwtDecode(credentialResponse.credential);
       const { name, email, picture } = decoded;
 
-      const res = await axios.post("/api/users/google", {
-        name,
-        email,
-        picture,
-      });
-
+      const res = await axios.post("/api/users/google", { name, email, picture });
       const { token, user } = res.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("userInfo", JSON.stringify(user));
+      setUser(user);
 
       if (user.isAdmin) {
         navigate("/admin/dashboard");
@@ -70,9 +62,7 @@ const Login = () => {
         {/* Left Side Banner */}
         <div className="bg-[#2874f0] text-white w-1/3 p-8 flex flex-col justify-center">
           <h2 className="text-3xl font-bold mb-4">Login</h2>
-          <p className="text-sm">
-            Get access to your Orders, Wishlist and Recommendations.
-          </p>
+          <p className="text-sm">Get access to your Orders, Wishlist and Recommendations.</p>
           <img
             src="https://img.freepik.com/free-vector/mobile-login-concept-illustration_114360-135.jpg"
             alt="login"
@@ -126,9 +116,7 @@ const Login = () => {
             <p className="text-gray-500 mb-2 text-sm">Or sign in using Google</p>
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={() => {
-                setError("Google login failed");
-              }}
+              onError={() => setError("Google login failed")}
             />
           </div>
 
