@@ -19,7 +19,7 @@ import Favourites from "./pages/Favourites";
 function App() {
   const [user, setUser] = useState(null);
 
-  // Load user from localStorage on initial render
+  
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem("userInfo"));
@@ -31,14 +31,14 @@ function App() {
 
   return (
     <>
-      {/* ✅ Pass user and setUser to Navbar */}
+      
       <Navbar user={user} setUser={setUser} />
 
       <div className="mt-4 px-4 min-h-screen">
         <Routes>
           <Route path="/" element={<Home />} />
 
-          {/* ✅ Pass setUser to Login and Register */}
+          
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
 
